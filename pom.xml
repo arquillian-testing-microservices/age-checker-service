@@ -80,8 +80,51 @@
               <images>
                 <image>
                   <name>arquillian/age-checker:${project.version}</name>
+                  <alias>age-checker</alias>
                   <build>
-                    <dockerFileDir>${project.basedir}</dockerFileDir>
+                    <!-- FROM -->
+                    <from>openjdk:8-alpine</from>
+
+                    <!-- ADD -->
+                    <assembly>
+                      <!-- By default the assembly goes below '/maven' in the image but can be changed
+                           with base dir -->
+                      <basedir>/</basedir>
+                      <!-- Assembly Descriptor inlined. Could be also in an external file and then
+                           referenced via "<descriptor>"
+
+                           The next version of d-m-p will include a predefined descriptor
+                           "widlfly-swarm" so it will become even shorter.
+                           Track https://github.com/fabric8io/docker-maven-plugin/issues/584 for details.
+                           -->
+                      <inline>
+                        <files>
+                          <file>
+                            <source>${project.build.directory}/age-checker-service-swarm.jar</source>
+                          </file>
+                        </files>
+                      </inline>
+                    </assembly>
+
+                    <!-- WORKDIR -->
+                    <workdir>/</workdir>
+                    <!-- EXPOSE -->
+                    <ports>
+                      <port>8080</port>
+                    </ports>
+                    <!-- CMD -->
+                    <cmd>
+                      <exec>
+                        <arg>java</arg>
+                        <arg>-jar</arg>
+                        <arg>age-checker-service-swarm.jar</arg>
+                      </exec>
+                    </cmd>
+                    <!-- Alternative, this could be used which uses the shell execution format :
+                    <cmd>
+                      <shell>java -jar age-checker-service-swarm.jar</shell>
+                    </cmd>
+                    -->
                   </build>
                 </image>
               </images>
